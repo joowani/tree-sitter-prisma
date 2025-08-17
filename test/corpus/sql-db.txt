@@ -1,0 +1,190 @@
+==================
+SQL Database
+==================
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  email     String   @unique
+  name      String?
+  role      Role     @default(USER)
+  posts     Post[]
+}
+
+model Post {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  published Boolean  @default(false)
+  title     String   @db.VarChar(255)
+  author    User?    @relation(fields: [authorId], references: [id])
+  authorId  Int?
+}
+
+enum Role {
+  USER
+  ADMIN
+}
+
+---
+
+(program
+  (datasource_declaration
+    (identifier)
+    (statement_block
+      (assignment_expression
+        (variable)
+        (string))
+      (assignment_expression
+        (variable)
+        (call_expression
+          (identifier)
+          (arguments
+            (string))))))
+  (generator_declaration
+    (identifier)
+    (statement_block
+      (assignment_expression
+        (variable)
+        (string))))
+  (model_declaration
+    (identifier)
+    (statement_block
+      (column_declaration
+        (identifier)
+        (column_type
+          (identifier))
+        (attribute
+          (identifier))
+        (attribute
+          (call_expression
+            (identifier)
+            (arguments
+              (call_expression
+                (identifier)
+                (arguments))))))
+      (column_declaration
+        (identifier)
+        (column_type
+          (identifier))
+        (attribute
+          (call_expression
+            (identifier)
+            (arguments
+              (call_expression
+                (identifier)
+                (arguments))))))
+      (column_declaration
+        (identifier)
+        (column_type
+          (identifier))
+        (attribute
+          (identifier)))
+      (column_declaration
+        (identifier)
+        (column_type
+          (identifier)
+          (maybe)))
+      (column_declaration
+        (identifier)
+        (column_type
+          (identifier))
+        (attribute
+          (call_expression
+            (identifier)
+            (arguments
+              (identifier)))))
+      (column_declaration
+        (identifier)
+        (column_type
+          (identifier)
+          (array)))))
+  (model_declaration
+    (identifier)
+    (statement_block
+      (column_declaration
+        (identifier)
+        (column_type
+          (identifier))
+        (attribute
+          (identifier))
+        (attribute
+          (call_expression
+            (identifier)
+            (arguments
+              (call_expression
+                (identifier)
+                (arguments))))))
+      (column_declaration
+        (identifier)
+        (column_type
+          (identifier))
+        (attribute
+          (call_expression
+            (identifier)
+            (arguments
+              (call_expression
+                (identifier)
+                (arguments))))))
+      (column_declaration
+        (identifier)
+        (column_type
+          (identifier))
+        (attribute
+          (identifier)))
+      (column_declaration
+        (identifier)
+        (column_type
+          (identifier))
+        (attribute
+          (call_expression
+            (identifier)
+            (arguments
+              (false)))))
+      (column_declaration
+        (identifier)
+        (column_type
+          (identifier))
+        (attribute
+          (call_expression
+            (member_expression
+              (identifier)
+              (property_identifier))
+            (arguments
+              (number)))))
+      (column_declaration
+        (identifier)
+        (column_type
+          (identifier)
+          (maybe))
+        (attribute
+          (call_expression
+            (identifier)
+            (arguments
+              (type_expression
+                (identifier)
+                (array
+                  (identifier)))
+              (type_expression
+                (identifier)
+                (array
+                  (identifier)))))))
+      (column_declaration
+        (identifier)
+        (column_type
+          (identifier)
+          (maybe)))))
+  (enum_declaration
+    (identifier)
+    (enum_block
+      (enumeral)
+      (enumeral))))

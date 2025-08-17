@@ -1,0 +1,33 @@
+==================
+Comments Test
+==================
+
+// This is a developer comment
+/// This is a documentation comment
+model User {
+  id Int @id
+  // Another developer comment
+  /// Documentation for name field
+  name String
+}
+
+---
+
+(program
+  (developer_comment)
+  (comment)
+  (model_declaration
+    (identifier)
+    (statement_block
+      (column_declaration
+        (identifier)
+        (column_type
+          (identifier))
+        (attribute
+          (identifier)))
+      (developer_comment)
+      (comment)
+      (column_declaration
+        (identifier)
+        (column_type
+          (identifier))))))

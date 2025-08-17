@@ -1,0 +1,204 @@
+==================
+MongoDB
+==================
+
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  createdAt DateTime @default(now())
+  email     String   @unique
+  name      String?
+  role      Role     @default(USER)
+  posts     Post[]
+}
+
+model Post {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  published Boolean  @default(false)
+  title     String
+  author    User?    @relation(fields: [authorId], references: [id])
+  authorId  String   @db.ObjectId
+}
+
+enum Role {
+  USER
+  ADMIN
+}
+
+---
+
+(program
+  (datasource_declaration
+    (identifier)
+    (statement_block
+      (assignment_expression
+        (variable)
+        (string))
+      (assignment_expression
+        (variable)
+        (call_expression
+          (identifier)
+          (arguments
+            (string))))))
+  (generator_declaration
+    (identifier)
+    (statement_block
+      (assignment_expression
+        (variable)
+        (string))))
+  (model_declaration
+    (identifier)
+    (statement_block
+      (column_declaration
+        (identifier)
+        (column_type
+          (identifier))
+        (attribute
+          (identifier))
+        (attribute
+          (call_expression
+            (identifier)
+            (arguments
+              (call_expression
+                (identifier)
+                (arguments)))))
+        (attribute
+          (call_expression
+            (identifier)
+            (arguments
+              (string))))
+        (attribute
+          (member_expression
+            (identifier)
+            (property_identifier))))
+      (column_declaration
+        (identifier)
+        (column_type
+          (identifier))
+        (attribute
+          (call_expression
+            (identifier)
+            (arguments
+              (call_expression
+                (identifier)
+                (arguments))))))
+      (column_declaration
+        (identifier)
+        (column_type
+          (identifier))
+        (attribute
+          (identifier)))
+      (column_declaration
+        (identifier)
+        (column_type
+          (identifier)
+          (maybe)))
+      (column_declaration
+        (identifier)
+        (column_type
+          (identifier))
+        (attribute
+          (call_expression
+            (identifier)
+            (arguments
+              (identifier)))))
+      (column_declaration
+        (identifier)
+        (column_type
+          (identifier)
+          (array)))))
+  (model_declaration
+    (identifier)
+    (statement_block
+      (column_declaration
+        (identifier)
+        (column_type
+          (identifier))
+        (attribute
+          (identifier))
+        (attribute
+          (call_expression
+            (identifier)
+            (arguments
+              (call_expression
+                (identifier)
+                (arguments)))))
+        (attribute
+          (call_expression
+            (identifier)
+            (arguments
+              (string))))
+        (attribute
+          (member_expression
+            (identifier)
+            (property_identifier))))
+      (column_declaration
+        (identifier)
+        (column_type
+          (identifier))
+        (attribute
+          (call_expression
+            (identifier)
+            (arguments
+              (call_expression
+                (identifier)
+                (arguments))))))
+      (column_declaration
+        (identifier)
+        (column_type
+          (identifier))
+        (attribute
+          (identifier)))
+      (column_declaration
+        (identifier)
+        (column_type
+          (identifier))
+        (attribute
+          (call_expression
+            (identifier)
+            (arguments
+              (false)))))
+      (column_declaration
+        (identifier)
+        (column_type
+          (identifier)))
+      (column_declaration
+        (identifier)
+        (column_type
+          (identifier)
+          (maybe))
+        (attribute
+          (call_expression
+            (identifier)
+            (arguments
+              (type_expression
+                (identifier)
+                (array
+                  (identifier)))
+              (type_expression
+                (identifier)
+                (array
+                  (identifier)))))))
+      (column_declaration
+        (identifier)
+        (column_type
+          (identifier))
+        (attribute
+          (member_expression
+            (identifier)
+            (property_identifier))))))
+  (enum_declaration
+    (identifier)
+    (enum_block
+      (enumeral)
+      (enumeral))))
