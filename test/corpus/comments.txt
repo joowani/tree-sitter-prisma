@@ -1,0 +1,102 @@
+==================
+Comments Test
+==================
+
+// This is a developer comment
+/// This is a documentation comment
+model User {
+  id Int @id
+  // Another developer comment
+  /// Documentation for name field
+  name String
+}
+
+---
+
+(program
+  (developer_comment)
+  (comment)
+  (model_declaration
+    (identifier)
+    (statement_block
+      (column_declaration
+        (identifier)
+        (column_type
+          (identifier))
+        (attribute
+          (identifier)))
+      (developer_comment)
+      (comment)
+      (column_declaration
+        (identifier)
+        (column_type
+          (identifier))))))
+
+==================
+Empty comments preserve declarations
+==================
+
+//
+model User {
+  //
+  id Int @id
+  ///
+  //
+  name String
+}
+//
+
+---
+
+(program
+  (developer_comment)
+  (model_declaration
+    (identifier)
+    (statement_block
+      (developer_comment)
+      (column_declaration
+        (identifier)
+        (column_type (identifier))
+        (attribute (identifier)))
+      (comment)
+      (developer_comment)
+      (column_declaration
+        (identifier)
+        (column_type (identifier)))))
+  (developer_comment))
+
+==================
+Block comments preserve declarations and expressions
+==================
+
+/* Public models
+   // The line comment marker is part of the block comment.
+   /* A block comment ends at the first closing delimiter. */
+model User {
+  /** Identifier **/
+  id /* field type */ Int @id
+  name String @default(/* default value */ "value")
+}
+/**/
+
+---
+
+(program
+  (block_comment)
+  (model_declaration
+    (identifier)
+    (statement_block
+      (block_comment)
+      (column_declaration
+        (identifier)
+        (block_comment)
+        (column_type (identifier))
+        (attribute (identifier)))
+      (column_declaration
+        (identifier)
+        (column_type (identifier))
+        (attribute
+          (call_expression
+            (identifier)
+            (arguments (block_comment) (string)))))))
+  (block_comment))

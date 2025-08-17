@@ -1,0 +1,86 @@
+==================
+Signed integer and decimal defaults
+==================
+
+model Measurement {
+  id Int @id
+  count Int @default(-1)
+  price Decimal @default(22.99)
+  offset Float @default(-1.5)
+  values Float[] @default([0.5, -2.25, 3])
+}
+
+---
+
+(program
+  (model_declaration
+    (identifier)
+    (statement_block
+      (column_declaration
+        (identifier)
+        (column_type (identifier))
+        (attribute (identifier)))
+      (column_declaration
+        (identifier)
+        (column_type (identifier))
+        (attribute (call_expression (identifier) (arguments (number)))))
+      (column_declaration
+        (identifier)
+        (column_type (identifier))
+        (attribute (call_expression (identifier) (arguments (number)))))
+      (column_declaration
+        (identifier)
+        (column_type (identifier))
+        (attribute (call_expression (identifier) (arguments (number)))))
+      (column_declaration
+        (identifier)
+        (column_type (identifier) (array))
+        (attribute
+          (call_expression
+            (identifier)
+            (arguments (array (number) (number) (number)))))))))
+
+==================
+Escaped backslashes preserve string boundaries
+==================
+
+model File {
+  id Int @id
+  path String @default("folder\\", map: "path_default")
+  label String @default("a\"b")
+  settings Json @default("{\"key\":\"value\"}")
+  paths String[] @default(["one\\", "two\\", "three"])
+}
+
+---
+
+(program
+  (model_declaration
+    (identifier)
+    (statement_block
+      (column_declaration
+        (identifier)
+        (column_type (identifier))
+        (attribute (identifier)))
+      (column_declaration
+        (identifier)
+        (column_type (identifier))
+        (attribute
+          (call_expression
+            (identifier)
+            (arguments (string) (type_expression (identifier) (string))))))
+      (column_declaration
+        (identifier)
+        (column_type (identifier))
+        (attribute (call_expression (identifier) (arguments (string)))))
+      (column_declaration
+        (identifier)
+        (column_type (identifier))
+        (attribute (call_expression (identifier) (arguments (string)))))
+      (column_declaration
+        (identifier)
+        (column_type (identifier) (array))
+        (attribute
+          (call_expression
+            (identifier)
+            (arguments (array (string) (string) (string)))))))))

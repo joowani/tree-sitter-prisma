@@ -1,0 +1,129 @@
+name: check
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_call:
+    inputs:
+      ref:
+        description: The commit to check, instead of the one that triggered the workflow
+        type: string
+        default: ''
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    name: Check
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+          ref: ${{ inputs.ref }}
+
+      - name: Install Node
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: '24.21.0'
+          cache: npm
+
+      - name: Install Rust toolchain
+        run: |
+          rustup toolchain install stable --profile minimal --component clippy,rustfmt --no-self-update
+          rustup default stable
+
+      - name: Install Go
+        uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
+        with:
+          go-version: '1.27.2'
+          cache: 'true'
+
+      - name: Install Zig
+        uses: mlugg/setup-zig@d1434d08867e3ee9daa34448df10607b98908d29 # v2.2.1
+        with:
+          version: '0.16.0'
+
+      - name: Install Node dependencies
+        run: npm ci
+
+      # The generated parser is committed, so regenerating it must not change anything.
+      - name: Verify generated parser
+        run: |
+          npm run generate
+          git status --porcelain -- src
+          test -z "$(git status --porcelain -- src)"
+
+      - name: Test grammar
+        run: npm test
+
+      - name: Test Node binding
+        run: npm run test:node
+
+      - name: Check Rust formatting
+        run: cargo fmt --check
+
+      - name: Lint Rust binding
+        run: cargo clippy --locked --all-targets -- -D warnings
+
+      # Without target flags, `cargo test` also runs the doc test in bindings/rust/lib.rs.
+      - name: Test Rust binding
+        run: cargo test --locked
+
+      - name: Test Go binding
+        run: go test -mod=readonly ./...
+
+      - name: Test Zig binding
+        run: zig build test -Dtest
+
+      - name: Test Python binding
+        run: |
+          python3 -m venv .venv
+          .venv/bin/python -m pip install '.[core]'
+          .venv/bin/python -m unittest discover -s bindings/python/tests -v
+
+      - name: Build and install C binding
+        run: |
+          cmake -S . -B build/cmake-prebuilt -DTREE_SITTER_CLI=
+          cmake --build build/cmake-prebuilt
+          cmake -S . -B build/cmake -DTREE_SITTER_CLI="$PWD/node_modules/.bin/tree-sitter" \
+              -DCMAKE_INSTALL_PREFIX="$RUNNER_TEMP/prisma-cmake"
+          cmake --build build/cmake
+          cmake --install build/cmake
+          make install PREFIX="$RUNNER_TEMP/prisma-make" TS="$PWD/node_modules/.bin/tree-sitter"
+
+      - name: Build and install GNU Windows C binding
+        run: |
+          make clean
+          make install CC='zig cc -target x86_64-windows-gnu' AR='zig ar' \
+              PREFIX="$RUNNER_TEMP/prisma-mingw" TS="$PWD/node_modules/.bin/tree-sitter"
+          test -f "$RUNNER_TEMP/prisma-mingw/bin/libtree-sitter-prisma.dll"
+          test -f "$RUNNER_TEMP/prisma-mingw/lib/libtree-sitter-prisma.dll.a"
+
+      - name: Check release script
+        run: |
+          bash -n scripts/publish
+          shellcheck scripts/publish
+          scripts/publish --check "$(node -p 'JSON.parse(require("fs").readFileSync("package.json")).version')"
+          python3 scripts/test-publish.py
+
+      - name: Verify crate package
+        run: cargo publish --locked --dry-run
+
+  swift:
+    name: Test Swift binding
+    runs-on: macos-26
+    timeout-minutes: 15
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+          ref: ${{ inputs.ref }}
+
+      - name: Test Swift binding
+        run: swift test

@@ -1,0 +1,35 @@
+==================
+Mapped enum values and block attributes
+==================
+
+enum Role {
+  /// An administrator
+  ADMIN @map("admin")
+  USER
+  GUEST @map(name: "guest")
+
+  @@map("roles")
+  @@schema("auth")
+}
+
+---
+
+(program
+  (enum_declaration
+    (identifier)
+    (enum_block
+      (comment)
+      (enumeral
+        (identifier)
+        (attribute (call_expression (identifier) (arguments (string)))))
+      (enumeral (identifier))
+      (enumeral
+        (identifier)
+        (attribute
+          (call_expression
+            (identifier)
+            (arguments (type_expression (identifier) (string))))))
+      (block_attribute_declaration
+        (call_expression (identifier) (arguments (string))))
+      (block_attribute_declaration
+        (call_expression (identifier) (arguments (string)))))))
