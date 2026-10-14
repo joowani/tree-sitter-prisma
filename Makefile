@@ -1,6 +1,6 @@
 LANGUAGE_NAME := tree-sitter-prisma
 HOMEPAGE_URL := https://github.com/joowani/tree-sitter-prisma
-VERSION := 0.2.0
+VERSION := 0.2.1
 DESCRIPTION := Prisma grammar for tree-sitter
 
 # repository

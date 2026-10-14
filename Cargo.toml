@@ -1,7 +1,7 @@
 [package]
 name = "tree-sitter-prisma"
 description = "Prisma grammar for tree-sitter"
-version = "0.2.0"
+version = "0.2.1"
 authors = ["Joohwan Oh <joohwan.oh@outlook.com>"]
 license = "MIT"
 readme = "README.md"
