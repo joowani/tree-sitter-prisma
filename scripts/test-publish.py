@@ -99,11 +99,18 @@ class TestReleaseVersions(unittest.TestCase):
             "tree-sitter.json", "Makefile", "CMakeLists.txt", "build.zig.zon",
         ]
         version = re.search(r'^version = "([^"]+)"', (ROOT / "Cargo.toml").read_text(), re.MULTILINE).group(1)
+        crate_entry = f'name = "tree-sitter-prisma"\nversion = "{version}"\n'
+        major = version.split(".")[0]
+        # Each mutation changes only the version that the publish script reads from that file.
+        mutations = {manifest: (version, "9.9.9") for manifest in manifests}
+        mutations["Cargo.lock"] = (crate_entry, crate_entry.replace(version, "9.9.9"))
+        mutations["src/parser.c"] = (f".major_version = {major},", ".major_version = 99,")
         with tempfile.TemporaryDirectory(prefix="prisma-version-test-") as directory:
             fixture = Path(directory)
             (fixture / "scripts").mkdir()
             shutil.copy2(ROOT / "scripts/publish", fixture / "scripts/publish")
-            for manifest in manifests:
+            for manifest in mutations:
+                (fixture / manifest).parent.mkdir(exist_ok=True)
                 shutil.copy2(ROOT / manifest, fixture / manifest)
 
             def check():
@@ -114,11 +121,12 @@ class TestReleaseVersions(unittest.TestCase):
 
             result = check()
             self.assertEqual(result.returncode, 0, result.stderr)
-            for manifest in manifests:
+            for manifest, (old, new) in mutations.items():
                 with self.subTest(manifest=manifest):
                     target = fixture / manifest
                     original = target.read_text()
-                    target.write_text(original.replace(version, "9.9.9", 1))
+                    self.assertIn(old, original)
+                    target.write_text(original.replace(old, new, 1))
                     result = check()
                     self.assertNotEqual(result.returncode, 0)
                     self.assertIn(manifest, result.stderr)
