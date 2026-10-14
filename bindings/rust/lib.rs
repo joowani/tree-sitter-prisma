@@ -66,4 +66,10 @@ mod tests {
         assert_eq!(tree.root_node().kind(), "program");
         assert!(!tree.root_node().has_error());
     }
+
+    #[test]
+    fn test_loads_the_highlights_query() {
+        tree_sitter::Query::new(&super::LANGUAGE.into(), super::HIGHLIGHTS_QUERY)
+            .expect("Error loading highlights query");
+    }
 }

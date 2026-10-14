@@ -17,6 +17,10 @@ const PRECEDENCE = {
   MEMBER: 9
 };
 
+// Identifiers end at whitespace, Unicode space separators (category Zs), and punctuation. They may contain `\u` escapes.
+const IDENTIFIER_START = /[^\x00-\x1F\s0-9:;`"'@#.,|^&<=>+*\/\\%?!~()\[\]{}\uFEFF\u2060\u200B\u00A0\u1680\u2000-\u200A\u202F\u205F\u3000]|\\u[0-9a-fA-F]{4}|\\u\{[0-9a-fA-F]+}/;
+const IDENTIFIER_PART = /[^\x00-\x1F\s:;`"'@#.,|^&<=>+*\/\\%?!~()\[\]{}\uFEFF\u2060\u200B\u00A0\u1680\u2000-\u200A\u202F\u205F\u3000]|\\u[0-9a-fA-F]{4}|\\u\{[0-9a-fA-F]+}/;
+
 export default grammar({
   name: 'prisma',
 
@@ -24,7 +28,7 @@ export default grammar({
     $.comment,
     $.developer_comment,
     $.block_comment,
-    /[\s\uFEFF\u2060\u200B\u00A0]/
+    /[\s\uFEFF\u2060\u200B\u00A0\u1680\u2000-\u200A\u202F\u205F\u3000]/
   ],
 
   inline: $ => [
@@ -275,22 +279,18 @@ export default grammar({
       $.array,
     ),
 
-    identifier: $ => {
-      const alpha = /[^\x00-\x1F\s0-9:;`"'@#.,|^&<=>+*\/\\%?!~()\[\]{}\uFEFF\u2060\u200B]|\\u[0-9a-fA-F]{4}|\\u\{[0-9a-fA-F]+}/
-      const alphanumeric = /[^\x00-\x1F\s:;`"'@#.,|^&<=>+*\/\\%?!~()\[\]{}\uFEFF\u2060\u200B]|\\u[0-9a-fA-F]{4}|\\u\{[0-9a-fA-F]+}/
-      return token(seq(alpha, repeat(alphanumeric)))
-    },
+    identifier: $ => token(seq(IDENTIFIER_START, repeat(IDENTIFIER_PART))),
 
+    // A backslash escapes any character, including a line break.
     string: $ => token(choice(
-      seq("'", /([^'\\\r\n]|\\[^\r\n])*/, "'"),
-      seq('"', /([^"\\\r\n]|\\[^\r\n])*/, '"')
+      seq("'", /([^'\\\r\n]|\\(\r\n|[\s\S]))*/, "'"),
+      seq('"', /([^"\\\r\n]|\\(\r\n|[\s\S]))*/, '"')
     )),
 
-    enumeral: $ => {
-      const alpha = /[^\x00-\x1F\s0-9:;`"'@#.,|^&<=>+*\/\\%?!~()\[\]{}\uFEFF\u2060\u200B]|\\u[0-9a-fA-F]{4}|\\u\{[0-9a-fA-F]+}/
-      const alphanumeric = /[^\x00-\x1F\s:;`"'@#.,|^&<=>+*\/\\%?!~()\[\]{}\uFEFF\u2060\u200B]|\\u[0-9a-fA-F]{4}|\\u\{[0-9a-fA-F]+}/
-      return seq(alias(token(seq(alpha, repeat(alphanumeric))), $.identifier), repeat($.attribute))
-    },
+    enumeral: $ => seq(
+      alias(token(seq(IDENTIFIER_START, repeat(IDENTIFIER_PART))), $.identifier),
+      repeat($.attribute),
+    ),
 
     number: $ => token(prec(1, /-?\d+(\.\d+)?/)),
 

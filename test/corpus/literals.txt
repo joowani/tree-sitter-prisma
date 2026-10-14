@@ -84,3 +84,22 @@ model File {
           (call_expression
             (identifier)
             (arguments (array (string) (string) (string)))))))))
+
+==================
+Escaped line breaks continue strings
+==================
+
+datasource db {
+  provider = "postgresql"
+  url      = "postgresql://localhost:5432/\
+app"
+}
+
+---
+
+(program
+  (datasource_declaration
+    (identifier)
+    (statement_block
+      (assignment_expression (variable) (string))
+      (assignment_expression (variable) (string)))))

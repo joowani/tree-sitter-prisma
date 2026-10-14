@@ -1,6 +1,6 @@
 from unittest import TestCase
 
-from tree_sitter import Language, Parser
+from tree_sitter import Language, Parser, Query
 import tree_sitter_prisma
 
 
@@ -12,8 +12,13 @@ class TestLanguage(TestCase):
         self.assertFalse(tree.root_node.has_error)
         self.assertEqual(tree.root_node.named_children[0].type, "model_declaration")
 
+    def test_exposes_the_highlights_query(self):
+        source = tree_sitter_prisma.HIGHLIGHTS_QUERY
+        self.assertIsInstance(source, str)
+        Query(Language(tree_sitter_prisma.language()), source)
+
     def test_handles_missing_optional_queries(self):
-        for name in ["HIGHLIGHTS_QUERY", "INJECTIONS_QUERY", "LOCALS_QUERY", "TAGS_QUERY"]:
+        for name in ["INJECTIONS_QUERY", "LOCALS_QUERY", "TAGS_QUERY"]:
             with self.subTest(query=name):
                 self.assertIsNone(getattr(tree_sitter_prisma, name))
                 self.assertIsNone(getattr(tree_sitter_prisma, name))

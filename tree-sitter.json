@@ -10,6 +10,7 @@
       "file-types": [
         "prisma"
       ],
+      "highlights": "queries/highlights.scm",
       "injection-regex": "^prisma$"
     }
   ],

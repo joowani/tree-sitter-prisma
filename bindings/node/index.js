@@ -17,7 +17,7 @@ try {
   binding.nodeTypeInfo = nodeTypes.default;
 } catch { }
 
-// Prisma has no query files to embed in standalone Bun executables.
+// A standalone Bun executable has no package directory to read query files from, so its queries stay undefined.
 // noinspection JSUnresolvedReference
 if (!(typeof process.versions.bun === "string" && Bun.isStandaloneExecutable)) {
   const queries = [

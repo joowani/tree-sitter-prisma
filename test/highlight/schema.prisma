@@ -1,0 +1,105 @@
+/// The main database
+// <- comment.documentation
+
+datasource db {
+// <- keyword
+//         ^ module
+//            ^ punctuation.bracket
+  provider   = "postgresql"
+  // ^ property
+  //         ^ operator
+  //           ^ string
+  url        = env("DATABASE_URL")
+  //           ^ function.builtin
+  extensions = [pg_trgm, postgis(version: "2.1")]
+  //            ^ variable
+  //                   ^ punctuation.delimiter
+  //                     ^ variable
+  //                             ^ variable.parameter
+  //                                    ^ punctuation.delimiter
+}
+
+generator client {
+// <- keyword
+//        ^ module
+  previewFeatures = ["views"]
+  enabled         = true
+  //                ^ constant.builtin
+}
+
+/* Blog posts */
+// <- comment
+model Post {
+// <- keyword
+//    ^ type
+  id       Int      @id @default(autoincrement())
+  // <- property
+  //       ^ type.builtin
+  //                ^ attribute
+  //                 ^ attribute
+  //                    ^ attribute
+  //                             ^ function.builtin
+  title    String?  @db.VarChar(255)
+  //       ^ type.builtin
+  //             ^ punctuation.special
+  //                 ^ attribute
+  //                   ^ punctuation.delimiter
+  //                    ^ attribute
+  //                            ^ number
+  tags     String[]
+  //             ^ punctuation.bracket
+  author   User     @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  //       ^ type
+  //                          ^ variable.parameter
+  //                                   ^ variable
+  //                                              ^ variable.parameter
+  //                                                                ^ variable.parameter
+  //                                                                          ^ constant
+  geo      Unsupported("circle")
+  //       ^ type.builtin
+  role     Role     @default(USER)
+  //       ^ type
+  //                         ^ constant
+  score    Float    @default(-1.5)
+  //                         ^ number
+
+  @@index([title(ops: raw("gin_trgm_ops"))], type: Gin)
+  // <- attribute
+  //^ attribute
+  //       ^ variable
+  //             ^ variable.parameter
+  //                  ^ function.builtin
+  //                                         ^ variable.parameter
+  //                                               ^ constant
+}
+
+view Summary {
+// <- keyword
+//   ^ type
+  id Int @unique
+}
+
+type Address {
+// <- keyword
+//   ^ type
+  street String
+  // <- property
+  //     ^ type.builtin
+}
+
+type UserId = String @id
+//   ^ type
+//            ^ type.builtin
+
+enum Role {
+// <- keyword
+//   ^ type
+  USER
+  // <- constant
+  ADMIN @map("admin")
+  // <- constant
+  //    ^ attribute
+
+  @@map("roles")
+  // <- attribute
+}
